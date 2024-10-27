@@ -2,7 +2,7 @@ from pytest_sftpserver.sftp.content_provider import ContentProvider
 from pytest_sftpserver.sftp.server import SFTPServer
 
 
-class FixedContentProvider(ContentProvider):  # fixes default content_object
+class FixedContentProvider(ContentProvider):
     '''
     This fixes broken behavior on the default ContentProvider.
 

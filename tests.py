@@ -3,7 +3,7 @@ from unittest import TestCase
 
 from pysftp import CnOpts  # TODO switch out pysftp for paramiko
 
-from .sftpmock import MockSFTPServers, with_sftpmock
+from sftpmock import MockSFTPServers, with_sftpmock
 
 
 class SFTPMockerTest(TestCase):
@@ -24,21 +24,21 @@ class SFTPMockerTest(TestCase):
         Tests if Connection was mocked to include the hostname -> port attribute (_fake_server_port)
         '''
         # Import needs to happen here because we want to use mocked Connection
-        from pysftp import Connection
+        from paramiko import Transport
 
         assert hasattr(
-            Connection, "_fake_server_port"), "Connection class should have mocked _fake_server_port attribute"
+            Transport, "_fake_server_port"), "Transport class should have mocked _fake_server_port attribute"
 
-        assert isinstance(Connection._fake_server_port, dict)
+        assert isinstance(Transport._fake_server_port, dict)
 
-        assert "test.com.br" in Connection._fake_server_port, "Connection should have 'test.com.br' as _fake_server_port key"
-        assert "otherdomain.com" in Connection._fake_server_port, "Connection should have 'otherdomain.com' as _fake_server_port key"
+        assert "test.com.br" in Transport._fake_server_port, "Transport should have 'test.com.br' as _fake_server_port key"
+        assert "otherdomain.com" in Transport._fake_server_port, "Transport should have 'otherdomain.com' as _fake_server_port key"
 
-        assert Connection._fake_server_port["test.com.br"] is not None, "Connection should have a port for 'test.com.br'"
-        assert Connection._fake_server_port["otherdomain.com"] is not None, "Connection should have a port for 'otherdomain.com'"
+        assert Transport._fake_server_port["test.com.br"] is not None, "Transport should have a port for 'test.com.br'"
+        assert Transport._fake_server_port["otherdomain.com"] is not None, "Transport should have a port for 'otherdomain.com'"
 
-        assert Connection._fake_server_port["test.com.br"] != Connection._fake_server_port[
-            "otherdomain.com"], "Connection should have different ports for different hosts"
+        assert Transport._fake_server_port["test.com.br"] != Transport._fake_server_port[
+            "otherdomain.com"], "Transport should have different ports for different hosts"
 
     @with_sftpmock({
         "test.com.br": {"a_folder": {"file.txt": "some text"}},

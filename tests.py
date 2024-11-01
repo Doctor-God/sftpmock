@@ -49,11 +49,11 @@ class SFTPMockerTest(TestCase):
         Test if SFTPClient.getfo works as expected 
         '''
         # Import needs to happen here because we need to use mocked Transport
-        from paramiko import Transport
+        from paramiko import SFTPClient
 
-        with Transport(("test.com", 22)) as transport:
+        with paramiko.Transport(("test.com", 22)) as transport:
             transport.connect(None, "user", "pass")
-            client = paramiko.SFTPClient.from_transport(transport)
+            client = SFTPClient.from_transport(transport)
 
             outfile = BytesIO()
             client.getfo("/a_folder/file.txt", outfile)

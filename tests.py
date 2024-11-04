@@ -51,6 +51,8 @@ class SFTPMockerTest(TestCase):
         # Import needs to happen here because we need to use mocked Transport
         from paramiko import SFTPClient
 
+        # TODO this transport hangs because connection does not exist
+        # Need to find a way to circumvent this when mocking SFTPClient
         with paramiko.Transport(("test.com", 22)) as transport:
             transport.connect(None, "user", "pass")
             client = SFTPClient.from_transport(transport)

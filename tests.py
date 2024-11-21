@@ -1,4 +1,5 @@
 from io import BytesIO, StringIO
+import socket
 from unittest import TestCase
 
 import paramiko
@@ -24,7 +25,7 @@ class SFTPMockerTest(TestCase):
         '''
         Tests if Connection was mocked to include the hostname -> port attribute (_fake_server_port)
         '''
-        # Import needs to happen here because we want to use mocked Connection
+        # Import needs to happen here because we want to use mocked Transport
         from paramiko import Transport
 
         assert hasattr(
@@ -66,7 +67,7 @@ class SFTPMockerTest(TestCase):
         '''
         Test if Connection.putfo works as expected 
         '''
-        # Import needs to happen here because we need to use mocked Connection
+        # Import needs to happen here because we need to use mocked Transport
         from paramiko import Transport
 
         with Transport(("test.com", 22)) as transport:
@@ -87,7 +88,7 @@ class SFTPMockerTest(TestCase):
         '''
         Test if Connection.putfo works as expected 
         '''
-        # Import needs to happen here because we need to use mocked Connection
+        # Import needs to happen here because we need to use mocked Transport
         from paramiko import Transport
 
         with Transport(("test.com", 22)) as transport:
@@ -118,7 +119,7 @@ class SFTPMockerTest(TestCase):
         '''
         Test if nested connections work correctly as two separate servers 
         '''
-        # Import needs to happen here because we need to use mocked Connection
+        # Import needs to happen here because we need to use mocked Transport
         from paramiko import Transport
 
         with Transport(("test.com", 22)) as transport:
@@ -181,8 +182,52 @@ class SFTPMockerTest(TestCase):
         assert all(not server.is_alive() for server in servers_context.host_servers.values()), \
             "Servers should be stopped"
 
+    @with_sftpmock({
+        "test.com": {},
+    })
+    def test_init_with_string(self):
+        '''
+        Test if Transport can be initialized with a string as sock argument
+        '''
+        # Import needs to happen here because we need to use mocked Transport
+        from paramiko import Transport
+
+        with Transport("test.com:22") as transport:
+            assert transport.hostname == "localhost"
+
+    @with_sftpmock({
+        "test.com": {},
+    })
+    def test_init_with_tuple(self):
+        '''
+        Test if Transport can be initialized with a tuple as sock argument
+        '''
+        # Import needs to happen here because we need to use mocked Transport
+        from paramiko import Transport
+
+        with Transport(("test.com", 22)) as transport:
+            assert transport.hostname == "localhost"
+
+    @with_sftpmock({
+        "test.com": {},
+    })
+    def test_init_with_socket(self):
+        '''
+        Test if Transport can be initialized with a socket as sock argument
+        '''
+        # Import needs to happen here because we need to use mocked Transport
+        from paramiko import Transport
+
+        # TODO fix this behavior, maybe have a flag to make sure socket bind works?
+
+        serversocket = socket.socket()
+
+        serversocket.bind(("test.com", 22))
+
+        with Transport(serversocket) as transport:
+            assert transport.hostname == "localhost"
+
     # TODO add tests to check so other forms of using paramiko client like:
-    #   - Init Transport with 'sock' arg as string, tuple and socket
     #   - Not creating client without transport
     #   - Using SSHClient instead of SFTPClient
     #   - Connecting socket before using Transport (if that even is possible)

@@ -7,6 +7,7 @@ from pytest_sftpserver.sftp.server import SFTPServer
 import paramiko
 from socket import socket
 from server import FixedContentProvider
+from unittest.mock import MagicMock
 
 
 class MockSFTPServers(object):
@@ -18,7 +19,7 @@ class MockSFTPServers(object):
 
     # TODO have ways to test authentication errors by saving provided fake credentials
 
-    def __init__(self, host_contents: dict):
+    def __init__(self, host_contents: dict, mock_socket_bind=False):
         '''
         host_contents should be in the format:
         {
@@ -32,6 +33,7 @@ class MockSFTPServers(object):
         self.host_contents = host_contents
         # set when servers start on __enter__
         self.host_servers: Dict[str, SFTPServer] = {}
+        self.mock_socket_bind = mock_socket_bind
 
     def __enter__(self):
         # We ignore original port, but there is a small likelyhoood of having two FTPs on the same hostname
@@ -44,6 +46,9 @@ class MockSFTPServers(object):
             self.host_servers[host] = server
 
         self._real_Transport__init__ = paramiko.Transport.__init__
+        if self.mock_socket_bind:
+            self.__real_socket_bind = socket.bind
+            socket.bind = MagicMock()
 
         def _fake_transport_init(*args, **kwargs):
             '''
@@ -55,7 +60,7 @@ class MockSFTPServers(object):
                 self._real_Transport__init__, *args, **kwargs)
             transport_self = kwargs.get("self")
             sock = kwargs.pop("sock")
-            
+
             real_host = None
             real_port = None
             if isinstance(sock, socket):
@@ -66,11 +71,13 @@ class MockSFTPServers(object):
             elif isinstance(sock, str):
                 real_host, real_port = sock.split(":")
             else:
-                raise ValueError("sock argument must be a socket, a tuple or a string")
-                
-            #NOTE this prevents paramiko usage on pytest_sftpserver from breaking
+                raise ValueError(
+                    "sock argument must be a socket, a tuple or a string")
+
+            # NOTE this prevents paramiko usage on pytest_sftpserver from breaking
             if real_host not in ("localhost", "127.0.0.1"):
-                self._real_Transport__init__(sock=("localhost", transport_self._fake_server_port[real_host]), **kwargs)
+                self._real_Transport__init__(
+                    sock=("localhost", transport_self._fake_server_port[real_host]), **kwargs)
             else:
                 self._real_Transport__init__(sock=sock, **kwargs)
 
@@ -88,9 +95,11 @@ class MockSFTPServers(object):
         # Restore Transport to its original state
         paramiko.Transport.__init__ = self._real_Transport__init__
         del paramiko.Transport._fake_server_port
+        if self.mock_socket_bind:
+            socket.bind = self.__real_socket_bind
 
 
-def with_sftpmock(host_contents: dict = {}):
+def with_sftpmock(host_contents: dict = {}, mock_socket_bind=False):
     '''
     Decorator to makes the specified SFTP connections use a local, fake server
 
@@ -106,7 +115,7 @@ def with_sftpmock(host_contents: dict = {}):
     '''
 
     # Create a local, fake server
-    servers_context = MockSFTPServers(host_contents)
+    servers_context = MockSFTPServers(host_contents, mock_socket_bind)
 
     def decorator(func):
         @ wraps(func)
@@ -116,6 +125,3 @@ def with_sftpmock(host_contents: dict = {}):
                 return func(*inner_args, **kwargs)
         return inner
     return decorator
-
-
-

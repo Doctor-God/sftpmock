@@ -210,7 +210,8 @@ class SFTPMockerTest(TestCase):
 
     @with_sftpmock({
         "test.com": {},
-    })
+    },
+        mock_socket_bind=True)
     def test_init_with_socket(self):
         '''
         Test if Transport can be initialized with a socket as sock argument
@@ -227,7 +228,30 @@ class SFTPMockerTest(TestCase):
         with Transport(serversocket) as transport:
             assert transport.hostname == "localhost"
 
+    @with_sftpmock({
+        "test.com": {},
+    })
+    def _test_init_client_directly(self):
+        '''
+        Test if using SFTPClient.__init__ works as expected
+        '''
+        # TODO maybe this test does not make sense
+        # Also can't figure out how to make Channel work
+
+        # Import needs to happen here because we need to use mocked Transport
+        from paramiko import SFTPClient
+
+        channel = paramiko.Channel(1)
+
+        print(channel.getpeername())
+
+        # channel.co
+
+        # with SFTPClient(channel) as client:
+        #     assert client.transport.hostname == "localhost"
+
     # TODO add tests to check so other forms of using paramiko client like:
     #   - Not creating client without transport
+    #       - Cant figure out to to use paramiko.Channel. Maybe this test is unecessary
     #   - Using SSHClient instead of SFTPClient
     #   - Connecting socket before using Transport (if that even is possible)

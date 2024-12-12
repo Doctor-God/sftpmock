@@ -211,7 +211,7 @@ class SFTPMockerTest(TestCase):
     @with_sftpmock({
         "test.com": {},
     },
-        mock_socket_bind=True)
+        mock_socket_connect=True)
     def test_init_with_socket(self):
         '''
         Test if Transport can be initialized with a socket as sock argument
@@ -223,7 +223,7 @@ class SFTPMockerTest(TestCase):
 
         serversocket = socket.socket()
 
-        serversocket.bind(("test.com", 22))
+        serversocket.connect(("test.com", 22))
 
         with Transport(serversocket) as transport:
             assert transport.hostname == "localhost"

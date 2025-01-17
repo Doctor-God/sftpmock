@@ -6,7 +6,7 @@ import paramiko
 from pysftp import CnOpts  # TODO switch out pysftp for paramiko
 
 from sftpmock import MockSFTPServers, with_sftpmock
-
+from unittest import mock
 
 class SFTPMockerTest(TestCase):
     '''
@@ -210,16 +210,17 @@ class SFTPMockerTest(TestCase):
 
     @with_sftpmock({
         "test.com": {},
-    },
-        mock_socket_connect=True)
-    def test_init_with_socket(self):
+    })
+    # @mock.patch.object(socket.socket, 'getsockname', return_value=("test.com", 22))
+    @mock.patch('socket.socket', spec=socket.socket)
+    def test_init_with_socket(self, mock_socket):
         '''
         Test if Transport can be initialized with a socket as sock argument
         '''
         # Import needs to happen here because we need to use mocked Transport
         from paramiko import Transport
 
-        # TODO fix this behavior, maybe have a flag to make sure socket bind works?
+        mock_socket.return_value.getsockname.return_value = ("test.com", 22)
 
         serversocket = socket.socket()
 
@@ -231,27 +232,23 @@ class SFTPMockerTest(TestCase):
     @with_sftpmock({
         "test.com": {},
     })
-    def _test_init_client_directly(self):
+    def test_other_connections(self):
         '''
-        Test if using SFTPClient.__init__ works as expected
+        Test if a non-mocked server is unnafected by the decorator
         '''
-        # TODO maybe this test does not make sense
-        # Also can't figure out how to make Channel work
-
+        #NOTE this test does an actual connection and tests if it fails, which it should
+        #This also means this test is slighly slower, due to timeout not being changeable in this case
+        
         # Import needs to happen here because we need to use mocked Transport
-        from paramiko import SFTPClient
+        from paramiko import Transport
 
-        channel = paramiko.Channel(1)
 
-        print(channel.getpeername())
-
-        # channel.co
-
-        # with SFTPClient(channel) as client:
-        #     assert client.transport.hostname == "localhost"
-
-    # TODO add tests to check so other forms of using paramiko client like:
-    #   - Not creating client without transport
-    #       - Cant figure out to to use paramiko.Channel. Maybe this test is unecessary
-    #   - Using SSHClient instead of SFTPClient
-    #   - Connecting socket before using Transport (if that even is possible)
+        with mock.patch('socket.getaddrinfo') as mock_getaddrinfo:
+            try:
+                with Transport("example.com:22") as transport:
+                    pass
+            except:
+                #This raises and exception because of the mocked getaddrinfo,
+                # but we only want to know if the connection was attempted, meaning it was not mocked
+                pass
+            mock_getaddrinfo.assert_called_once_with("example.com", 22, socket.AF_UNSPEC, socket.SOCK_STREAM)

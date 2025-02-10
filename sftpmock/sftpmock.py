@@ -57,7 +57,7 @@ class MockSFTPServers(object):
             transport_self = kwargs.get("self")
             sock = kwargs.pop("sock")
 
-            #Extract real host and port from sock argument
+            # Extract real host and port from sock argument
             real_host = None
             real_port = None
             if isinstance(sock, socket):
@@ -72,7 +72,7 @@ class MockSFTPServers(object):
                     "sock argument must be a socket, a tuple or a string")
 
             # This prevents paramiko usage on pytest_sftpserver from breaking
-            # and makes non-mocked connections be unnafected 
+            # and makes non-mocked connections be unnafected
             if (real_host not in ("localhost", "127.0.0.1")) and (real_host in transport_self._fake_server_port):
                 self._real_Transport__init__(
                     sock=("localhost", transport_self._fake_server_port[real_host]), **kwargs)
@@ -87,7 +87,9 @@ class MockSFTPServers(object):
     def __exit__(self, type, value, traceback):
         # Stop servers
         for server in self.host_servers.values():
+            # This makes sure server is properly closed without leaving any sockets hanging
             server.shutdown()
+            server.server_close()
             server.join()
 
         # Restore Transport to its original state
@@ -114,7 +116,7 @@ def with_sftpmock(host_contents: dict = {}):
     servers_context = MockSFTPServers(host_contents)
 
     def decorator(func):
-        @ wraps(func)
+        @wraps(func)
         def inner(*inner_args, **kwargs):
             # Create a local server and replace Connection.__init__ to force connection to that server
             with servers_context:

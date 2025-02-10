@@ -8,6 +8,7 @@ from pysftp import CnOpts  # TODO switch out pysftp for paramiko
 from sftpmock import MockSFTPServers, with_sftpmock
 from unittest import mock
 
+
 class SFTPMockerTest(TestCase):
     '''
     This tests core functionality of the "with_sftpmock" decorator
@@ -158,6 +159,9 @@ class SFTPMockerTest(TestCase):
         assert all(not server.is_alive() for server in servers_context.host_servers.values()), \
             "Servers should be stopped"
 
+        assert all(server.socket._closed for server in servers_context.host_servers.values()), \
+            "All sockets should be closed"
+
     def test_servers_are_shutdown_exception(self):
         '''
         Test if servers are shutdown when an exception is raised
@@ -181,6 +185,9 @@ class SFTPMockerTest(TestCase):
 
         assert all(not server.is_alive() for server in servers_context.host_servers.values()), \
             "Servers should be stopped"
+
+        assert all(server.socket._closed for server in servers_context.host_servers.values()), \
+            "All sockets should be closed"
 
     @with_sftpmock({
         "test.com": {},
@@ -236,19 +243,19 @@ class SFTPMockerTest(TestCase):
         '''
         Test if a non-mocked server is unnafected by the decorator
         '''
-        #NOTE this test does an actual connection and tests if it fails, which it should
-        #This also means this test is slighly slower, due to timeout not being changeable in this case
-        
+        # NOTE this test does an actual connection and tests if it fails, which it should
+        # This also means this test is slighly slower, due to timeout not being changeable in this case
+
         # Import needs to happen here because we need to use mocked Transport
         from paramiko import Transport
-
 
         with mock.patch('socket.getaddrinfo') as mock_getaddrinfo:
             try:
                 with Transport("example.com:22") as transport:
                     pass
             except:
-                #This raises and exception because of the mocked getaddrinfo,
+                # This raises and exception because of the mocked getaddrinfo,
                 # but we only want to know if the connection was attempted, meaning it was not mocked
                 pass
-            mock_getaddrinfo.assert_called_once_with("example.com", 22, socket.AF_UNSPEC, socket.SOCK_STREAM)
+            mock_getaddrinfo.assert_called_once_with(
+                "example.com", 22, socket.AF_UNSPEC, socket.SOCK_STREAM)

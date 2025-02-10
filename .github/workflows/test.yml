@@ -13,11 +13,11 @@ on:
 jobs:
   build:
 
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.0.X", "3.1.X", "3.2.X", "3.3.X", "3.4.X", "3.5.X", "3.6.X", "3.7.X", "3.8.X", "3.9.X", "3.10.X", "3.11.X", "3.12.X", "3.13.X"]
+        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
 
     steps:
     - uses: actions/checkout@v4

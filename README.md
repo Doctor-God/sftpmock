@@ -1,5 +1,6 @@
 # sftpmock
-
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)]
+![Tests](https://github.com/Doctor-God/sftpmock/actions/workflows/test.yml/badge.svg?branch=main) 
 
 ## Known Issues / Limitations
 - Trying to test transport.sock hostname and ports may result in errors, as they are replaced by localhost and a random local port

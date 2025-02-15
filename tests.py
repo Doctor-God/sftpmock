@@ -3,7 +3,6 @@ import socket
 from unittest import TestCase
 
 import paramiko
-from pysftp import CnOpts  # TODO switch out pysftp for paramiko
 
 from sftpmock import SFTMock, with_sftpmock
 from unittest import mock
@@ -13,10 +12,6 @@ class SFTPMockerTest(TestCase):
     '''
     This tests core functionality of the "with_sftpmock" decorator
     '''
-
-    def setUp(self):
-        self.cnopts = CnOpts()
-        self.cnopts.hostkeys = None
 
     @with_sftpmock({
         "test.com": {"Outbound": {"file.txt": "some text"}},

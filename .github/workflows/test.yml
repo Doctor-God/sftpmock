@@ -47,5 +47,5 @@ jobs:
     - name: Save coverage badge
       uses: actions/upload-artifact@v4
       with:
-        name: code-coverage-badge
+        name: code-coverage-badge.svg
         path: code-coverage-badge.svg

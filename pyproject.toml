@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sftpmock"
+version = "1.0.0"
+authors = [{ name = "Bruno Werner" }]
+description = "Allows to mock SFTP servers' connection and contents for testing"
+readme = "README.md"
+requires-python = ">=3.9"
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "Operating System :: OS Independent",
+]
+license = { file = "LICENSE" }
+
+[project.urls]
+Homepage = "https://github.com/Doctor-God/sftpmock"
+Issues = "https://github.com/Doctor-God/sftpmock/issues"

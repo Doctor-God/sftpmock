@@ -5,7 +5,7 @@ from unittest import TestCase
 import paramiko
 from pysftp import CnOpts  # TODO switch out pysftp for paramiko
 
-from sftpmock import MockSFTPServers, with_sftpmock
+from sftpmock import SFTMock, with_sftpmock
 from unittest import mock
 
 
@@ -143,10 +143,10 @@ class SFTPMockerTest(TestCase):
         '''
         Test if servers are shutdown when execution ends normally.
 
-        We test MockSFTPServers directly because we need to check its variables
+        We test SFTMock directly because we need to check its variables
         '''
-        servers_context = MockSFTPServers({
-            "test.com": {"Outbound": {"EDI_020_20210704_023428_0017_004524526_000739.TXT": "some text"}},
+        servers_context = SFTMock({
+            "test.com": {"Outbound": {"file.TXT": "some text"}},
             "otherdomain.com": {"Outbound": {"another.TXT": "another text"}}
         })
 
@@ -166,10 +166,10 @@ class SFTPMockerTest(TestCase):
         '''
         Test if servers are shutdown when an exception is raised
 
-        We test MockSFTPServers directly because we need to check its variables
+        We test SFTMock directly because we need to check its variables
         '''
-        servers_context = MockSFTPServers({
-            "test.com": {"Outbound": {"EDI_020_20210704_023428_0017_004524526_000739.TXT": "some text"}},
+        servers_context = SFTMock({
+            "test.com": {"Outbound": {"file.TXT": "some text"}},
             "otherdomain.com": {"Outbound": {"another.TXT": "another text"}}
         })
 
@@ -218,7 +218,6 @@ class SFTPMockerTest(TestCase):
     @with_sftpmock({
         "test.com": {},
     })
-    # @mock.patch.object(socket.socket, 'getsockname', return_value=("test.com", 22))
     @mock.patch('socket.socket', spec=socket.socket)
     def test_init_with_socket(self, mock_socket):
         '''

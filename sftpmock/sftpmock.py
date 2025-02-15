@@ -10,7 +10,7 @@ from sftpmock.server import FixedContentProvider
 from unittest.mock import MagicMock
 
 
-class MockSFTPServers(object):
+class SFTPMock(object):
     '''
     Act as a context to make local SFTP servers run for its duration
 
@@ -113,7 +113,7 @@ def with_sftpmock(host_contents: dict = {}):
     '''
 
     # Create a local, fake server
-    servers_context = MockSFTPServers(host_contents)
+    servers_context = SFTPMock(host_contents)
 
     def decorator(func):
         @wraps(func)

@@ -38,4 +38,14 @@ jobs:
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - name: Test with pytest
       run: |
-        python -m unittest tests
+        coverage run -m unittest tests
+
+    - name: Generate coverage report badge
+      run: |
+        python -m pip install coverage-badge
+        coverage-badge -o code-coverage-badge.svg
+    - name: Save coverage badge
+      uses: actions/upload-artifact@v4
+      with:
+        name: code-coverage-badge
+        path: code-coverage-badge.svg

@@ -4,7 +4,7 @@ from unittest import TestCase
 
 import paramiko
 
-from sftpmock import SFTMock, with_sftpmock
+from sftpmock import SFTPMock, with_sftpmock
 from unittest import mock
 
 
@@ -138,9 +138,9 @@ class SFTPMockerTest(TestCase):
         '''
         Test if servers are shutdown when execution ends normally.
 
-        We test SFTMock directly because we need to check its variables
+        We test SFTPMock directly because we need to check its variables
         '''
-        servers_context = SFTMock({
+        servers_context = SFTPMock({
             "test.com": {"Outbound": {"file.TXT": "some text"}},
             "otherdomain.com": {"Outbound": {"another.TXT": "another text"}}
         })
@@ -161,9 +161,9 @@ class SFTPMockerTest(TestCase):
         '''
         Test if servers are shutdown when an exception is raised
 
-        We test SFTMock directly because we need to check its variables
+        We test SFTPMock directly because we need to check its variables
         '''
-        servers_context = SFTMock({
+        servers_context = SFTPMock({
             "test.com": {"Outbound": {"file.TXT": "some text"}},
             "otherdomain.com": {"Outbound": {"another.TXT": "another text"}}
         })

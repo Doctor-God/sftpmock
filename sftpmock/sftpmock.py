@@ -2,7 +2,7 @@ from functools import wraps
 from inspect import getcallargs
 from typing import Dict
 
-import pysftp  # TODO switch out to use paramiko directly
+  # TODO switch out to use paramiko directly
 from pytest_sftpserver.sftp.server import SFTPServer
 import paramiko
 from socket import socket
@@ -101,13 +101,14 @@ def with_sftpmock(host_contents: dict = {}):
     '''
     Decorator to makes the specified SFTP connections use a local, fake server
 
-    This ONLY works on the pysftp library, any other library will still try to connect to the real server
-
     host_contents should be in the format:
         {
-            "hostname": {
-                "path": "content",
-                "path2": "content2",
+            "mockedserver.com": {
+                "folder": {
+                    "sub_folder": {
+                        "file.txt": "file content"
+                    }
+                }
             }
         }
     '''
